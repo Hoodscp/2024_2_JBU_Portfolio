@@ -35,23 +35,8 @@ const PDFViewer = () => {
   }
 
   return (
-    <div className="flex flex-col items-center mt-10">
-      <h1 className="text-2xl font-bold mb-5">PDF Viewer</h1>
-      <div className="flex space-x-4 mb-5">
-        <button onClick={() => setPdfFile(pdfFiles.DLL)} className="btn">
-          DLL.pdf
-        </button>
-        <button onClick={() => setPdfFile(pdfFiles.MinRev)} className="btn">
-          MinRev.pdf
-        </button>
-        <button onClick={() => setPdfFile(pdfFiles.Pwndbg)} className="btn">
-          Pwndbg.pdf
-        </button>
-        <button onClick={() => setPdfFile(pdfFiles.UPX)} className="btn">
-          UPX.pdf
-        </button>
-      </div>
-
+    <div className="flex flex-col items-center justify-center h-screen">
+      <h1 className="text-4xl font-extrabold">MY Presentation</h1>
       {pdfFile ? (
         <>
           <div className="flex justify-center overflow-x-auto">
@@ -64,19 +49,44 @@ const PDFViewer = () => {
             </Document>
           </div>
           <div className="flex items-center mt-4">
-            <button onClick={handlePrevious} className="btn">
+            <button onClick={handlePrevious} className="btn aaabutton">
               Previous
             </button>
             <p className="mx-4">
               Page {pageNumber} of {numPages}
             </p>
-            <button onClick={handleNext} className="btn">
+            <button onClick={handleNext} className="btn aaabutton">
               Next
             </button>
           </div>
         </>
       ) : (
-        <p>No PDF file specified.</p>
+        <div className="flex space-x-4">
+          <button
+            onClick={() => setPdfFile(pdfFiles.DLL)}
+            className="btn aaabutton"
+          >
+            DLL.pdf
+          </button>
+          <button
+            onClick={() => setPdfFile(pdfFiles.MinRev)}
+            className="btn aaabutton"
+          >
+            MinRev.pdf
+          </button>
+          <button
+            onClick={() => setPdfFile(pdfFiles.Pwndbg)}
+            className="btn aaabutton"
+          >
+            Pwndbg.pdf
+          </button>
+          <button
+            onClick={() => setPdfFile(pdfFiles.UPX)}
+            className="btn aaabutton"
+          >
+            UPX.pdf
+          </button>
+        </div>
       )}
     </div>
   )
