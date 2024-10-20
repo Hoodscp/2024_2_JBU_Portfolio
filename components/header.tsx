@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 export default function Header() {
   return (
-    <div className="font-[family-name:var(--font-geist-mono)] sticky top-0 left-0 right-0">
+    <div className="font-[family-name:var(--font-geist-mono)] sticky top-0 left-0 right-0 z-up">
       <nav className="bg-black py-4 px-8 border-double border-b-8 border-white">
         <div className="flex items-center justify-between container">
           <div className="flex items-center font-bold">

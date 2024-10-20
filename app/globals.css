@@ -52,3 +52,7 @@ button {
 button:hover {
   background-color: #555;
 }
+
+.z-up {
+  z-index: +1;
+}
