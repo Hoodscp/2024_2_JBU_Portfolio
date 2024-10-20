@@ -1,151 +1,83 @@
 'use client'
-import { useCallback, useState } from 'react'
-import { useResizeObserver } from '@wojtekmaj/react-hooks'
-import { pdfjs, Document, Page } from 'react-pdf'
-import 'react-pdf/dist/esm/Page/AnnotationLayer.css'
-import 'react-pdf/dist/esm/Page/TextLayer.css'
+import { useState } from 'react'
+import { Document, Page, pdfjs } from 'react-pdf'
 
-import type { PDFDocumentProxy } from 'pdfjs-dist'
+// PDF.js worker 설정
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`
 
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.mjs',
-  import.meta.url
-).toString()
+const PDFViewer = () => {
+  const [pdfFile, setPdfFile] = useState<string | null>(null)
+  const [pageNumber, setPageNumber] = useState(1)
+  const [numPages, setNumPages] = useState<number | null>(null)
 
-const options = {
-  cMapUrl: '/cmaps/',
-  standardFontDataUrl: '/standard_fonts/',
-}
-
-const resizeObserverOptions = {}
-
-const maxWidth = 800
-
-type PDFFile = string | File | null
-
-export default function Sample() {
-  const [file, setFile] = useState<PDFFile>(null)
-  const [numPages, setNumPages] = useState<number>()
-  const [pageNumber, setPageNumber] = useState<number>(1)
-  const [containerRef, setContainerRef] = useState<HTMLElement | null>(null)
-  const [containerWidth, setContainerWidth] = useState<number>()
-
-  const onResize = useCallback<ResizeObserverCallback>((entries) => {
-    const [entry] = entries
-
-    if (entry) {
-      setContainerWidth(entry.contentRect.width)
-    }
-  }, [])
-
-  useResizeObserver(containerRef, resizeObserverOptions, onResize)
-
-  function onFileChange(event: React.ChangeEvent<HTMLInputElement>): void {
-    const { files } = event.target
-    const nextFile = files?.[0]
-
-    if (nextFile) {
-      setFile(nextFile)
-      setPageNumber(1)
-    }
+  const pdfFiles = {
+    DLL: '/pdfs/DLL.pdf',
+    MinRev: '/pdfs/MinRev.pdf',
+    Pwndbg: '/pdfs/Pwndbg.pdf',
+    UPX: '/pdfs/UPX.pdf',
   }
 
-  function onDocumentLoadSuccess({
-    numPages: nextNumPages,
-  }: PDFDocumentProxy): void {
-    setNumPages(nextNumPages)
-  }
-
-  function goToPrevPage() {
-    setPageNumber((prevPage) => Math.max(prevPage - 1, 1))
-  }
-
-  function goToNextPage() {
-    setPageNumber((prevPage) => Math.min(prevPage + 1, numPages || 1))
-  }
-
-  function loadPDF(filePath: string) {
-    setFile(filePath)
+  const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
+    setNumPages(numPages)
     setPageNumber(1)
   }
 
-  return (
-    <div className="Example">
-      <header>
-        <h1 className="text-4xl font-extrabold text-center m-4 font-[family-name:var(--font-geist-mono)]">
-          PDF Viewer
-        </h1>
-      </header>
+  const handlePrevious = () => {
+    if (pageNumber > 1) {
+      setPageNumber(pageNumber - 1)
+    }
+  }
 
-      {/* PDF 선택 버튼 */}
-      <div className="Example__container__load m-4 flex justify-center space-x-4">
-        <button
-          className="text-white bg-black hover:bg-gray-300 hover:text-black border-black border-2 rounded-md p-2"
-          onClick={() => loadPDF('./doc/DLL.pdf')}
-        >
+  const handleNext = () => {
+    if (numPages && pageNumber < numPages) {
+      setPageNumber(pageNumber + 1)
+    }
+  }
+
+  return (
+    <div className="flex flex-col items-center mt-10">
+      <h1 className="text-2xl font-bold mb-5">PDF Viewer</h1>
+      <div className="flex space-x-4 mb-5">
+        <button onClick={() => setPdfFile(pdfFiles.DLL)} className="btn">
           DLL.pdf
         </button>
-        <button
-          className="text-white bg-black hover:bg-gray-300 hover:text-black border-black border-2 rounded-md p-2"
-          onClick={() => loadPDF('./doc/MinRev.pdf')}
-        >
+        <button onClick={() => setPdfFile(pdfFiles.MinRev)} className="btn">
           MinRev.pdf
         </button>
-        <button
-          className="text-white bg-black hover:bg-gray-300 hover:text-black border-black border-2 rounded-md p-2"
-          onClick={() => loadPDF('./doc/Pwndbg.pdf')}
-        >
+        <button onClick={() => setPdfFile(pdfFiles.Pwndbg)} className="btn">
           Pwndbg.pdf
         </button>
-        <button
-          className="text-white bg-black hover:bg-gray-300 hover:text-black border-black border-2 rounded-md p-2"
-          onClick={() => loadPDF('./doc/UPX.pdf')}
-        >
+        <button onClick={() => setPdfFile(pdfFiles.UPX)} className="btn">
           UPX.pdf
         </button>
       </div>
 
-      {/* PDF 파일 업로드 */}
-      <div className="Example__container__load m-4">
-        <label htmlFor="file">Load from file:</label>{' '}
-        <input onChange={onFileChange} type="file" />
-      </div>
-
-      {/* PDF 문서 렌더링 */}
-      <div className="Example__container__document" ref={setContainerRef}>
-        <Document
-          file={file}
-          onLoadSuccess={onDocumentLoadSuccess}
-          options={options}
-          className={'flex justify-center border-y-4 border-black'}
-        >
-          <Page
-            pageNumber={pageNumber}
-            width={
-              containerWidth ? Math.min(containerWidth, maxWidth) : maxWidth
-            }
-          />
-        </Document>
-        <div className="pagination flex items-center justify-center">
-          <button
-            className="text-white bg-black hover:bg-gray-300 hover:text-black border-black border-2 rounded-md p-1 m-4"
-            onClick={goToPrevPage}
-            disabled={pageNumber <= 1}
+      {pdfFile ? (
+        <>
+          <Document
+            file={pdfFile}
+            onLoadSuccess={onDocumentLoadSuccess}
+            className="border p-4"
           >
-            Previous
-          </button>
-          <span className="text-black border-black border-y-2 rounded-md p-1 m-4">
-            Page {pageNumber} of {numPages}
-          </span>
-          <button
-            className="text-white bg-black hover:bg-gray-300 hover:text-black border-black border-2 rounded-md p-1 m-4"
-            onClick={goToNextPage}
-            disabled={pageNumber >= (numPages || 1)}
-          >
-            Next
-          </button>
-        </div>
-      </div>
+            <Page pageNumber={pageNumber} />
+          </Document>
+          <div className="flex items-center mt-4">
+            <button onClick={handlePrevious} className="btn">
+              Previous
+            </button>
+            <p className="mx-4">
+              Page {pageNumber} of {numPages}
+            </p>
+            <button onClick={handleNext} className="btn">
+              Next
+            </button>
+          </div>
+        </>
+      ) : (
+        <p>No PDF file specified.</p>
+      )}
     </div>
   )
 }
+
+export default PDFViewer
