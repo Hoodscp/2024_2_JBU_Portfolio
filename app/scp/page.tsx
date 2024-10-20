@@ -54,13 +54,15 @@ const PDFViewer = () => {
 
       {pdfFile ? (
         <>
-          <Document
-            file={pdfFile}
-            onLoadSuccess={onDocumentLoadSuccess}
-            className="border p-4"
-          >
-            <Page pageNumber={pageNumber} />
-          </Document>
+          <div className="flex justify-center overflow-x-auto">
+            <Document
+              file={pdfFile}
+              onLoadSuccess={onDocumentLoadSuccess}
+              className="border p-4 max-w-full"
+            >
+              <Page pageNumber={pageNumber} width={1000} />
+            </Document>
+          </div>
           <div className="flex items-center mt-4">
             <button onClick={handlePrevious} className="btn">
               Previous
